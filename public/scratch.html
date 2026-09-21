@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scratch & Win — The Stationery Hub</title>
+  <link rel="icon" href="logo.jpg">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
+    :root {
+      --navy: #1B2A4A;
+      --gold: #B8A04A;
+      --cream: #F5F0E1;
+      --teal: #4A9E8E;
+      --light-gold: #D4C878;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--cream) 0%, #E8E0CC 50%, var(--cream) 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* ===== LOADING & ERROR ===== */
+    .loading-screen, .error-screen {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .loading-screen .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #E0D9C8;
+      border-top: 4px solid var(--gold);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-screen .icon { font-size: 60px; margin-bottom: 15px; }
+    .error-screen h2 { color: var(--navy); font-size: 20px; margin-bottom: 8px; }
+    .error-screen p { color: #888; font-size: 14px; }
+
+    /* ===== MAIN CARD ===== */
+    .main-container {
+      display: none;
+      width: 400px;
+      max-width: 95vw;
+    }
+
+    /* Header */
+    .card-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .card-header img {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 3px solid var(--gold);
+      box-shadow: 0 4px 20px rgba(184, 160, 74, 0.4);
+    }
+
+    .card-header h1 {
+      color: var(--navy);
+      font-size: 22px;
+      font-weight: 800;
+      margin-top: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .card-header .subtitle {
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 3px;
+    }
+
+    /* Customer Info */
+    .customer-info {
+      background: white;
+      border-radius: 14px;
+      padding: 18px 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border: 2px solid var(--gold);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed #E0D9C8;
+    }
+
+    .info-row:last-child { border-bottom: none; }
+
+    .info-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .info-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .amount-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--teal);
+    }
+
+    .tier-tag {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .tier-bronze { background: #F0E6C8; color: #8B6914; }
+    .tier-silver { background: #E0E8F0; color: #4A6080; }
+    .tier-gold { background: #FFF3CD; color: #856404; }
+
+    /* ===== SCRATCH CARD ===== */
+    .scratch-card {
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(27, 42, 74, 0.25), 0 0 0 3px var(--gold);
+    }
+
+    .card-bg {
+      background: linear-gradient(160deg, var(--navy) 0%, #2A3F6A 40%, var(--navy) 100%);
+      padding: 28px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-bg::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(184,160,74,0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 70%, rgba(74,158,142,0.06) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .card-top-label {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--gold), var(--light-gold));
+      color: var(--navy);
+      font-weight: 800;
+      font-size: 12px;
+      padding: 5px 18px;
+      border-radius: 20px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      color: var(--cream);
+      font-size: 24px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 3px;
+    }
+
+    .card-subtitle-text {
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      letter-spacing: 1px;
+    }
+
+    /* Scratch Area */
+    .scratch-area-wrapper {
+      position: relative;
+      width: 300px;
+      height: 170px;
+      margin: 0 auto 16px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px dashed var(--gold);
+    }
+
+    .prize-reveal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #FFF8E7, #FFFDF5);
+      padding: 15px;
+      z-index: 1;
+    }
+
+    .prize-emoji { font-size: 48px; margin-bottom: 6px; }
+
+    .prize-text {
+      color: var(--navy);
+      font-weight: 800;
+      font-size: 17px;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .prize-label {
+      color: var(--teal);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 6px;
+    }
+
+    .scratch-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      cursor: grab;
+      border-radius: 13px;
+      touch-action: none;
+    }
+
+    .scratch-hint {
+      color: rgba(245,240,225,0.8);
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    .dashed-divider {
+      border: none;
+      border-top: 2px dashed var(--gold);
+      opacity: 0.3;
+      margin: 8px 20px;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .card-footer img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold);
+    }
+
+    .card-footer span {
+      color: rgba(245,240,225,0.6);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    /* Already revealed state */
+    .already-revealed-msg {
+      display: none;
+      text-align: center;
+      margin-top: 15px;
+      background: white;
+      border-radius: 12px;
+      padding: 14px;
+      border: 2px solid var(--teal);
+    }
+
+    .already-revealed-msg p {
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Thank You */
+    .thank-you {
+      text-align: center;
+      margin-top: 18px;
+      color: #999;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    /* Confetti */
+    .confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    <p style="color: var(--navy); font-weight: 600;">Loading your scratch card...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-screen" id="errorScreen" style="display:none;">
+    <div class="icon">😔</div>
+    <h2>Scratch Card Not Found</h2>
+    <p>This link may be invalid or expired.</p>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-container" id="mainContainer">
+
+    <!-- Header -->
+    <div class="card-header">
+      <img src="logo.jpg" alt="The Stationery Hub">
+      <h1>The Stationery Hub</h1>
+      <div class="subtitle">✨ SCRATCH & WIN ✨</div>
+    </div>
+
+    <!-- Customer Info (Read-Only) -->
+    <div class="customer-info">
+      <div class="info-row">
+        <span class="info-label">👤 Customer</span>
+        <span class="info-value" id="custName">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">📱 Phone</span>
+        <span class="info-value" id="custPhone">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">💰 Purchase</span>
+        <span class="info-value amount-value" id="custAmount">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">🏷️ Tier</span>
+        <span id="custTier">—</span>
+      </div>
+    </div>
+
+    <!-- Scratch Card -->
+    <div class="scratch-card" id="scratchCard">
+      <div class="card-bg">
+        <div class="card-top-label" id="tierLabel">🥉 BRONZE TIER</div>
+        <div class="card-title">Scratch & Win!</div>
+        <div class="card-subtitle-text">A special gift awaits you 🎁</div>
+
+        <div class="scratch-area-wrapper">
+          <div class="prize-reveal" id="prizeReveal">
+            <div class="prize-emoji" id="prizeEmoji">🎁</div>
+            <div class="prize-text" id="prizeText">Your Prize</div>
+            <div class="prize-label">🎉 YOU WON! 🎉</div>
+          </div>
+          <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
+        </div>
+
+        <div class="scratch-hint" id="scratchHint">👆 Scratch the area above to reveal your gift!</div>
+
+        <hr class="dashed-divider">
+
+        <div class="card-footer">
+          <img src="logo.jpg" alt="Logo">
+          <span>The Stationery Hub • Est. 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Already Revealed Message -->
+    <div class="already-revealed-msg" id="alreadyRevealedMsg">
+      <p>✅ You've already scratched this card. Show this screen to claim your gift in-store!</p>
+    </div>
+
+    <p class="thank-you">Thank you for shopping at The Stationery Hub! ❤️</p>
+  </div>
+
+  <!-- Confetti -->
+  <canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
+  <script>
+    // ===== Get customer ID from URL =====
+    const urlParams = new URLSearchParams(window.location.search);
+    const customerId = urlParams.get('id');
+
+    const canvas = document.getElementById('scratchCanvas');
+    const ctx = canvas.getContext('2d');
+    let isScratching = false;
+    let revealed = false;
+    let customerData = null;
+
+    const scratchColors = {
+      bronze: { c1: '#B8A04A', c2: '#8B7938' },
+      silver: { c1: '#8B9EBD', c2: '#6B7F9D' },
+      gold:   { c1: '#D4AF37', c2: '#AA8A2E' }
+    };
+
+    const tierLabels = {
+      bronze: '🥉 BRONZE TIER',
+      silver: '🥈 SILVER TIER',
+      gold:   '🥇 GOLD TIER'
+    };
+
+    const tierDisplayNames = {
+      bronze: '🥉 Bronze',
+      silver: '🥈 Silver',
+      gold:   '🥇 Gold'
+    };
+
+    const tierClasses = {
+      bronze: 'tier-bronze',
+      silver: 'tier-silver',
+      gold:   'tier-gold'
+    };
+
+    // ===== Load customer data =====
+    async function loadCustomer() {
+      if (!customerId) {
+        showError();
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/customers/${customerId}`);
+        if (!res.ok) {
+          showError();
+          return;
+        }
+
+        customerData = await res.json();
+        displayCustomer(customerData);
+      } catch (err) {
+        console.error(err);
+        showError();
+      }
+    }
+
+    function showError() {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('errorScreen').style.display = 'block';
+    }
+
+    function displayCustomer(data) {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('mainContainer').style.display = 'block';
+
+      // Fill customer info
+      document.getElementById('custName').textContent = data.name;
+      document.getElementById('custPhone').textContent = data.phone;
+      document.getElementById('custAmount').textContent = `₹${data.amount}`;
+
+      const tierSpan = document.getElementById('custTier');
+      tierSpan.innerHTML = `<span class="tier-tag ${tierClasses[data.tier]}">${tierDisplayNames[data.tier]}</span>`;
+
+      // Set tier label on card
+      document.getElementById('tierLabel').textContent = tierLabels[data.tier];
+
+      // If already revealed
+      if (data.revealed) {
+        revealed = true;
+        document.getElementById('prizeEmoji').textContent = data.prize_emoji;
+        document.getElementById('prizeText').textContent = data.prize_text;
+        canvas.style.display = 'none';
+        document.getElementById('scratchHint').style.display = 'none';
+        document.getElementById('alreadyRevealedMsg').style.display = 'block';
+      } else {
+        setupCanvas(data.tier);
+      }
+    }
+
+    // ===== Canvas Setup =====
+    function setupCanvas(tier) {
+      const wrapper = canvas.parentElement;
+      const rect = wrapper.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+
+      const colors = scratchColors[tier];
+
+      // Gradient coating
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, colors.c1);
+      gradient.addColorStop(1, colors.c2);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Sparkle pattern
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      for (let i = 0; i < 60; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const size = Math.random() * 3 + 1;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Text
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = 'bold 20px Poppins, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('✨ SCRATCH HERE ✨', canvas.width / 2, canvas.height / 2 - 12);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.font = '12px Poppins, sans-serif';
+      ctx.fillText('Use your finger to scratch', canvas.width / 2, canvas.height / 2 + 16);
+
+      // Corner decorations
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.font = '22px sans-serif';
+      ctx.fillText('⭐', 40, 30);
+      ctx.fillText('⭐', canvas.width - 40, canvas.height - 30);
+      ctx.fillText('✦', canvas.width - 35, 35);
+      ctx.fillText('✦', 35, canvas.height - 35);
+
+      canvas.style.display = 'block';
+    }
+
+    // ===== Scratching =====
+    function scratch(x, y) {
+      if (revealed) return;
+
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 24, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.lineWidth = 48;
+      ctx.lineCap = 'round';
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+
+      checkScratchProgress();
+    }
+
+    function checkScratchProgress() {
+      if (revealed) return;
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const pixels = imageData.data;
+      let transparent = 0;
+      const total = pixels.length / 4;
+
+      for (let i = 3; i < pixels.length; i += 4) {
+        if (pixels[i] < 128) transparent++;
+      }
+
+      const percent = (transparent / total) * 100;
+
+      if (percent > 40) {
+        revealPrize();
+      }
+    }
+
+    async function revealPrize() {
+      revealed = true;
+      canvas.style.display = 'none';
+      document.getElementById('scratchHint').style.display = 'none';
+
+      // Call API to reveal
+      try {
+        const res = await fetch(`/api/customers/${customerId}/reveal`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await res.json();
+        document.getElementById('prizeEmoji').textContent = data.prize_emoji;
+        document.getElementById('prizeText').textContent = data.prize_text;
+      } catch (err) {
+        console.error('Failed to reveal:', err);
+        document.getElementById('prizeText').textContent = 'Show this to the store!';
+      }
+
+      launchConfetti();
+    }
+
+    // ===== Confetti =====
+    function launchConfetti() {
+      const confCanvas = document.getElementById('confettiCanvas');
+      const confCtx = confCanvas.getContext('2d');
+      confCanvas.width = window.innerWidth;
+      confCanvas.height = window.innerHeight;
+
+      const colors = ['#B8A04A', '#1B2A4A', '#4A9E8E', '#D4C878', '#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FF8C00'];
+      const confetti = [];
+
+      for (let i = 0; i < 180; i++) {
+        confetti.push({
+          x: Math.random() * confCanvas.width,
+          y: Math.random() * confCanvas.height - confCanvas.height,
+          w: Math.random() * 10 + 5,
+          h: Math.random() * 6 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 5,
+          vy: Math.random() * 4 + 2,
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 12,
+          opacity: 1,
+        });
+      }
+
+      let frame = 0;
+      const maxFrames = 200;
+
+      function animate() {
+        confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+
+        confetti.forEach(c => {
+          c.x += c.vx;
+          c.y += c.vy;
+          c.rotation += c.rotSpeed;
+          c.vy += 0.05;
+
+          if (frame > maxFrames - 60) {
+            c.opacity = Math.max(0, c.opacity - 0.018);
+          }
+
+          confCtx.save();
+          confCtx.translate(c.x, c.y);
+          confCtx.rotate((c.rotation * Math.PI) / 180);
+          confCtx.globalAlpha = c.opacity;
+          confCtx.fillStyle = c.color;
+          confCtx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+          confCtx.restore();
+        });
+
+        frame++;
+        if (frame < maxFrames) {
+          requestAnimationFrame(animate);
+        } else {
+          confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+        }
+      }
+
+      animate();
+    }
+
+    // ===== Event Listeners =====
+    canvas.addEventListener('mousedown', (e) => {
+      isScratching = true;
+      const rect = canvas.getBoundingClientRect();
+      scratch(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isScratching) return;
+      const rect = canvas.getBoundingClientRect();
+      scratch(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    canvas.addEventListener('mouseup', () => { isScratching = false; });
+    canvas.addEventListener('mouseleave', () => { isScratching = false; });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      isScratching = true;
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      scratch(touch.clientX - rect.left, touch.clientY - rect.top);
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!isScratching) return;
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      scratch(touch.clientX - rect.left, touch.clientY - rect.top);
+    });
+
+    canvas.addEventListener('touchend', () => { isScratching = false; });
+
+    // ===== Init =====
+    loadCustomer();
+  </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+scratch_cards.db
+.env
+venv/
+.DS_Store
+node_modules/
