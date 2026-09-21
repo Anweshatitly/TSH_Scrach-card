@@ -96,25 +96,45 @@ def create_customer():
     amount = data.get('amount')
 
     if not name or not phone or not amount:
-        return jsonify({'error': 'Name, phone, and amount are required'}), 400
+        return jsonify({
+            'error': 'Name, phone, and amount are required'
+        }), 400
 
     try:
         amount = float(amount)
     except (ValueError, TypeError):
-        return jsonify({'error': 'Invalid amount'}), 400
+        return jsonify({
+            'error': 'Invalid amount'
+        }), 400
 
     if amount < 399:
-        return jsonify({'error': 'Minimum purchase amount is ₹399'}), 400
+        return jsonify({
+            'error': 'Minimum purchase amount is ₹399'
+        }), 400
 
     tier = get_tier(amount)
     prize = pick_random_prize(tier)
     customer_id = str(uuid.uuid4())
 
     conn = get_db()
+
     conn.execute(
-        'INSERT INTO customers (id, name, phone, amount, tier, prize_emoji, prize_text) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        (customer_id, name, phone, amount, tier, prize['emoji'], prize['text'])
+        '''
+        INSERT INTO customers
+        (id, name, phone, amount, tier, prize_emoji, prize_text)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''',
+        (
+            customer_id,
+            name,
+            phone,
+            amount,
+            tier,
+            prize['emoji'],
+            prize['text']
+        )
     )
+
     conn.commit()
     conn.close()
 
@@ -135,12 +155,20 @@ def create_customer():
 @app.route('/api/customers/<customer_id>', methods=['GET'])
 def get_customer(customer_id):
     """Get customer data for the scratch card page."""
+
     conn = get_db()
-    customer = conn.execute('SELECT * FROM customers WHERE id = ?', (customer_id,)).fetchone()
+
+    customer = conn.execute(
+        'SELECT * FROM customers WHERE id = ?',
+        (customer_id,)
+    ).fetchone()
+
     conn.close()
 
     if not customer:
-        return jsonify({'error': 'Scratch card not found'}), 404
+        return jsonify({
+            'error': 'Scratch card not found'
+        }), 404
 
     # Only send prize info if already revealed
     result = {
@@ -150,8 +178,14 @@ def get_customer(customer_id):
         'amount': customer['amount'],
         'tier': customer['tier'],
         'revealed': customer['revealed'] == 1,
-        'prize_emoji': customer['prize_emoji'] if customer['revealed'] == 1 else None,
-        'prize_text': customer['prize_text'] if customer['revealed'] == 1 else None,
+        'prize_emoji':
+            customer['prize_emoji']
+            if customer['revealed'] == 1
+            else None,
+        'prize_text':
+            customer['prize_text']
+            if customer['revealed'] == 1
+            else None,
         'created_at': customer['created_at']
     }
 
@@ -160,22 +194,34 @@ def get_customer(customer_id):
 @app.route('/api/customers/<customer_id>/reveal', methods=['POST'])
 def reveal_card(customer_id):
     """Customer scratches the card — mark as revealed."""
+
     conn = get_db()
-    customer = conn.execute('SELECT * FROM customers WHERE id = ?', (customer_id,)).fetchone()
+
+    customer = conn.execute(
+        'SELECT * FROM customers WHERE id = ?',
+        (customer_id,)
+    ).fetchone()
 
     if not customer:
         conn.close()
-        return jsonify({'error': 'Scratch card not found'}), 404
+        return jsonify({
+            'error': 'Scratch card not found'
+        }), 404
 
     if customer['revealed'] == 1:
         conn.close()
+
         return jsonify({
             'already_revealed': True,
             'prize_emoji': customer['prize_emoji'],
             'prize_text': customer['prize_text']
         })
 
-    conn.execute('UPDATE customers SET revealed = 1 WHERE id = ?', (customer_id,))
+    conn.execute(
+        'UPDATE customers SET revealed = 1 WHERE id = ?',
+        (customer_id,)
+    )
+
     conn.commit()
     conn.close()
 
@@ -188,11 +234,17 @@ def reveal_card(customer_id):
 @app.route('/api/admin/customers', methods=['GET'])
 def list_customers():
     """Admin: Get all customers."""
+
     conn = get_db()
-    customers = conn.execute('SELECT * FROM customers ORDER BY created_at DESC').fetchall()
+
+    customers = conn.execute(
+        'SELECT * FROM customers ORDER BY created_at DESC'
+    ).fetchall()
+
     conn.close()
 
     result = []
+
     for c in customers:
         result.append({
             'id': c['id'],
@@ -211,23 +263,47 @@ def list_customers():
 @app.route('/api/customers/<customer_id>', methods=['DELETE'])
 def delete_customer(customer_id):
     """Admin: Delete a customer record."""
+
     conn = get_db()
-    cursor = conn.execute('DELETE FROM customers WHERE id = ?', (customer_id,))
+
+    cursor = conn.execute(
+        'DELETE FROM customers WHERE id = ?',
+        (customer_id,)
+    )
+
     conn.commit()
     conn.close()
 
     if cursor.rowcount == 0:
-        return jsonify({'error': 'Customer not found'}), 404
+        return jsonify({
+            'error': 'Customer not found'
+        }), 404
 
-    return jsonify({'success': True})
+    return jsonify({
+        'success': True
+    })
+
+
+# ============================================================
+# INITIALIZE DATABASE WHEN FLASK/GUNICORN STARTS
+# ============================================================
+
+init_db()
+
 
 # ===== START =====
 if __name__ == '__main__':
-    init_db()
+
     port = int(os.environ.get('PORT', 3000))
-    print(f'\n* The Stationery Hub - Scratch Card Server')
-    print(f'  ----------------------------------------')
+
+    print('\n* The Stationery Hub - Scratch Card Server')
+    print('  ----------------------------------------')
     print(f'  Server running at: http://localhost:{port}')
     print(f'  Admin Panel:       http://localhost:{port}/admin.html')
-    print(f'  Database:          scratch_cards.db\n')
-    app.run(host='0.0.0.0', port=port, debug=True)
+    print('  Database:          scratch_cards.db\n')
+
+    app.run(
+        host='0.0.0.0',
+        port=port,
+        debug=True
+    )
