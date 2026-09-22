@@ -37,22 +37,22 @@ def init_db():
 # ===== PRIZE DATA =====
 TIER_PRIZES = {
     'bronze': [
-        {'emoji': '🖊️', 'text': 'Hauser Roller Pen'},
-        {'emoji': '🎒', 'text': 'Stationery Kit'},
-        {'emoji': '✏️', 'text': 'Apsara Zesta Pen'},
-        {'emoji': '🧽', 'text': 'Fancy Eraser'},
+        {'emoji': '🖊️', 'text': ' Roller Pen'},
+        {'emoji': '🎒', 'text': ' Mechanical Pencil'},
+        {'emoji': '✏️', 'text': 'Ball Pen'},
+        {'emoji': '🧽', 'text': 'Long Eraser'},
         {'emoji': '📓', 'text': 'Small Notebook'},
     ],
     'silver': [
-        {'emoji': '🔑', 'text': 'Handmade Keyring'},
-        {'emoji': '📸', 'text': 'Camera Keychain'},
-        {'emoji': '✨', 'text': 'Whitener'},
+        {'emoji': '🔑', 'text': 'Hauser Roller Pen'},
+        {'emoji': '📸', 'text': 'Keychain'},
+        {'emoji': '✨', 'text': 'Apsara Zesta'},
         {'emoji': '📋', 'text': 'Tape Whitener'},
         {'emoji': '🎒', 'text': 'Stationery Kit'},
     ],
     'gold': [
         {'emoji': '💰', 'text': '20% Discount on Next Order'},
-        {'emoji': '🎒', 'text': 'Stationery Kit'},
+        {'emoji': '🎒', 'text': 'Oil Pastel'},
         {'emoji': '📒', 'text': 'A5 Spiral Binding Notebook'},
         {'emoji': '🖋️', 'text': 'Premium Pen'},
     ]
