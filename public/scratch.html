@@ -332,6 +332,47 @@
       pointer-events: none;
       z-index: 1000;
     }
+
+    /* ===== 20% Discount Banner ===== */
+    .discount-banner {
+      display: none;
+      background: linear-gradient(135deg, #FFF3CD, #FFF8E1);
+      border: 2px solid #D4AF37;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-top: 15px;
+      text-align: center;
+      animation: glow-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(212, 175, 55, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.6); }
+    }
+
+    .discount-banner .discount-big {
+      font-size: 28px;
+      font-weight: 900;
+      color: #856404;
+      letter-spacing: 1px;
+    }
+
+    .discount-banner .discount-note {
+      font-size: 12px;
+      font-weight: 600;
+      color: #A07D1A;
+      margin-top: 4px;
+    }
+
+    /* ===== T&C Line ===== */
+    .tnc-text {
+      text-align: center;
+      color: #999;
+      font-size: 10px;
+      font-weight: 500;
+      margin-top: 12px;
+      letter-spacing: 0.5px;
+    }
   </style>
 </head>
 <body>
@@ -411,7 +452,14 @@
       <p>✅ You've already scratched this card. Show this screen to claim your gift in-store!</p>
     </div>
 
+    <!-- 20% Discount Special Banner (only shown when prize is 20% discount) -->
+    <div class="discount-banner" id="discountBanner">
+      <div class="discount-big">🎉 20% OFF Your Next Order!</div>
+      <div class="discount-note">You get 20% discount instead of 15% on your next purchase. Show this screen at the store to avail.</div>
+    </div>
+
     <p class="thank-you">Thank you for shopping at The Stationery Hub! ❤️</p>
+    <p class="tnc-text">* T&C Applied. One gift per scratch card. Gifts are subject to availability.</p>
   </div>
 
   <!-- Confetti -->
@@ -502,6 +550,11 @@
         canvas.style.display = 'none';
         document.getElementById('scratchHint').style.display = 'none';
         document.getElementById('alreadyRevealedMsg').style.display = 'block';
+
+        // Show discount banner if prize is 20% discount
+        if (data.prize_text && data.prize_text.toLowerCase().includes('20% discount')) {
+          document.getElementById('discountBanner').style.display = 'block';
+        }
       } else {
         setupCanvas(data.tier);
       }
@@ -609,6 +662,11 @@
         const data = await res.json();
         document.getElementById('prizeEmoji').textContent = data.prize_emoji;
         document.getElementById('prizeText').textContent = data.prize_text;
+
+        // Show discount banner if prize is 20% discount
+        if (data.prize_text && data.prize_text.toLowerCase().includes('20% discount')) {
+          document.getElementById('discountBanner').style.display = 'block';
+        }
       } catch (err) {
         console.error('Failed to reveal:', err);
         document.getElementById('prizeText').textContent = 'Show this to the store!';
